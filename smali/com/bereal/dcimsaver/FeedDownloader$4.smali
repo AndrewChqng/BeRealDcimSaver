@@ -27,7 +27,7 @@
 .method constructor <init>(Landroid/content/Context;Ljava/lang/String;)V
     .locals 0
 
-    .line 376
+    .line 428
     iput-object p1, p0, Lcom/bereal/dcimsaver/FeedDownloader$4;->val$target:Landroid/content/Context;
 
     iput-object p2, p0, Lcom/bereal/dcimsaver/FeedDownloader$4;->val$msg:Ljava/lang/String;
@@ -42,7 +42,7 @@
 .method public run()V
     .locals 3
 
-    .line 380
+    .line 432
     :try_start_0
     iget-object v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$4;->val$target:Landroid/content/Context;
 
@@ -60,13 +60,13 @@
 
     goto :goto_0
 
-    .line 381
+    .line 433
     :catchall_0
     move-exception v0
 
     :goto_0
     nop
 
-    .line 383
+    .line 435
     return-void
 .end method

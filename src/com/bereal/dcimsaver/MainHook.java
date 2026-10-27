@@ -539,6 +539,7 @@ public class MainHook implements IXposedHookLoadPackage {
         if (bmp == null || bmp.isRecycled()) {
             return;
         }
+        File tempFile = null;
         try {
             Context ctx = AndroidAppHelper.currentApplication();
             if (ctx == null) {
@@ -565,11 +566,25 @@ public class MainHook implements IXposedHookLoadPackage {
                 }
             }
 
-            String outName = "BeReal_fullres_" + role + "_" + System.currentTimeMillis() + ext;
+            long nowMs = System.currentTimeMillis();
+            String outName = "BeReal_fullres_" + role + "_" + nowMs + ext;
+
+            tempFile = new File(ctx.getCacheDir(), "fullres_tmp_" + System.nanoTime() + ext);
+            FileOutputStream tempFos = new FileOutputStream(tempFile);
+            try {
+                bmp.compress(compressFormat, 100, tempFos);
+                tempFos.getFD().sync();
+            } finally {
+                tempFos.close();
+            }
+
+            ExifHelper.applyOwnCaptureExif(ctx, tempFile, role, nowMs);
+
             ContentResolver resolver = ctx.getContentResolver();
             ContentValues values = new ContentValues();
             values.put(MediaStore.MediaColumns.DISPLAY_NAME, outName);
             values.put(MediaStore.MediaColumns.MIME_TYPE, mime);
+            ExifHelper.populateMediaStoreTimestamps(values, nowMs);
             if (Build.VERSION.SDK_INT >= 29) {
                 values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DCIM + "/BeReal");
                 values.put(MediaStore.MediaColumns.IS_PENDING, 1);
@@ -579,24 +594,36 @@ public class MainHook implements IXposedHookLoadPackage {
             if (uri != null) {
                 OutputStream os = resolver.openOutputStream(uri);
                 if (os != null) {
+                    FileInputStream fis = new FileInputStream(tempFile);
                     try {
-                        bmp.compress(compressFormat, 100, os);
+                        byte[] buf = new byte[8192];
+                        int n;
+                        while ((n = fis.read(buf)) > 0) {
+                            os.write(buf, 0, n);
+                        }
                         os.flush();
                     } finally {
+                        fis.close();
                         os.close();
                     }
                     if (Build.VERSION.SDK_INT >= 29) {
                         ContentValues done = new ContentValues();
+                        ExifHelper.populateMediaStoreTimestamps(done, nowMs);
                         done.put(MediaStore.MediaColumns.IS_PENDING, 0);
                         resolver.update(uri, done, null, null);
                     }
-                    XposedBridge.log(TAG + "Exported full-res sensor image ("
+                    XposedBridge.log(TAG + "Exported full-res sensor image with EXIF ("
                         + bmp.getWidth() + "x" + bmp.getHeight() + ") -> DCIM/BeReal/" + outName);
                 }
             }
         } catch (Throwable t) {
             XposedBridge.log(t);
         } finally {
+            try {
+                if (tempFile != null && tempFile.exists()) {
+                    tempFile.delete();
+                }
+            } catch (Throwable ignored) {}
             try {
                 if (!bmp.isRecycled()) {
                     bmp.recycle();
@@ -618,12 +645,45 @@ public class MainHook implements IXposedHookLoadPackage {
         String mime,
         boolean isVideo
     ) {
+        File tempFile = null;
         try {
+            File dcimDir = new File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
+                "BeReal"
+            );
+            File existing = new File(dcimDir, outName);
+            if (existing.exists() && existing.length() > 1024L) {
+                return true;
+            }
+
+            long captureMs = ExifHelper.parseTimestampFromFilename(src.getName());
+            File sourceToCopy = src;
+            if (!isVideo && ctx != null) {
+                tempFile = new File(ctx.getCacheDir(), "export_tmp_" + System.nanoTime() + "_" + outName);
+                FileInputStream in = new FileInputStream(src);
+                FileOutputStream out = new FileOutputStream(tempFile);
+                try {
+                    byte[] buf = new byte[8192];
+                    int n;
+                    while ((n = in.read(buf)) > 0) {
+                        out.write(buf, 0, n);
+                    }
+                    out.getFD().sync();
+                } finally {
+                    in.close();
+                    out.close();
+                }
+                String role = outName.contains("secondary") ? "secondary" : "primary";
+                ExifHelper.applyOwnCaptureExif(ctx, tempFile, role, captureMs);
+                sourceToCopy = tempFile;
+            }
+
             ContentResolver resolver = ctx.getContentResolver();
             ContentValues values = new ContentValues();
             values.put(MediaStore.MediaColumns.DISPLAY_NAME, outName);
             values.put(MediaStore.MediaColumns.MIME_TYPE, mime);
             values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DCIM + "/BeReal");
+            ExifHelper.populateMediaStoreTimestamps(values, captureMs);
             values.put(MediaStore.MediaColumns.IS_PENDING, 1);
 
             Uri collection = isVideo
@@ -638,7 +698,7 @@ public class MainHook implements IXposedHookLoadPackage {
             if (os == null) {
                 return false;
             }
-            FileInputStream fis = new FileInputStream(src);
+            FileInputStream fis = new FileInputStream(sourceToCopy);
             try {
                 byte[] buf = new byte[8192];
                 int n;
@@ -652,13 +712,20 @@ public class MainHook implements IXposedHookLoadPackage {
             }
 
             ContentValues done = new ContentValues();
+            ExifHelper.populateMediaStoreTimestamps(done, captureMs);
             done.put(MediaStore.MediaColumns.IS_PENDING, 0);
             resolver.update(itemUri, done, null, null);
-            XposedBridge.log(TAG + "Exported via MediaStore -> DCIM/BeReal/" + outName);
+            XposedBridge.log(TAG + "Exported via MediaStore with EXIF -> DCIM/BeReal/" + outName);
             return true;
         } catch (Throwable t) {
             XposedBridge.log(t);
             return false;
+        } finally {
+            try {
+                if (tempFile != null && tempFile.exists()) {
+                    tempFile.delete();
+                }
+            } catch (Throwable ignored) {}
         }
     }
 

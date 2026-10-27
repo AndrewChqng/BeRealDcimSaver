@@ -27,7 +27,7 @@
 .method constructor <init>(Ljava/util/List;Landroid/content/Context;)V
     .locals 0
 
-    .line 200
+    .line 210
     iput-object p1, p0, Lcom/bereal/dcimsaver/FeedDownloader$3;->val$posts:Ljava/util/List;
 
     iput-object p2, p0, Lcom/bereal/dcimsaver/FeedDownloader$3;->val$ctx:Landroid/content/Context;
@@ -42,10 +42,10 @@
 .method public run()V
     .locals 5
 
-    .line 203
+    .line 213
     nop
 
-    .line 204
+    .line 214
     iget-object v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$3;->val$posts:Ljava/util/List;
 
     invoke-interface {v0}, Ljava/util/List;->iterator()Ljava/util/Iterator;
@@ -61,7 +61,7 @@
 
     if-nez v2, :cond_0
 
-    .line 207
+    .line 217
     iget-object v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$3;->val$ctx:Landroid/content/Context;
 
     new-instance v2, Ljava/lang/StringBuilder;
@@ -74,7 +74,7 @@
 
     move-result-object v1
 
-    const-string v2, " files to DCIM/BeReal"
+    const-string v2, " files with EXIF to DCIM/BeReal"
 
     invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
@@ -86,10 +86,10 @@
 
     invoke-static {v0, v1}, Lcom/bereal/dcimsaver/FeedDownloader;->access$3(Landroid/content/Context;Ljava/lang/String;)V
 
-    .line 208
+    .line 218
     return-void
 
-    .line 204
+    .line 214
     :cond_0
     invoke-interface {v0}, Ljava/util/Iterator;->next()Ljava/lang/Object;
 
@@ -97,7 +97,7 @@
 
     check-cast v2, Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;
 
-    .line 205
+    .line 215
     iget-object v3, p0, Lcom/bereal/dcimsaver/FeedDownloader$3;->val$ctx:Landroid/content/Context;
 
     const/4 v4, 0x1

@@ -33,7 +33,7 @@
 .method constructor <init>(Landroid/content/Context;Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;ZZZ)V
     .locals 0
 
-    .line 181
+    .line 191
     iput-object p1, p0, Lcom/bereal/dcimsaver/FeedDownloader$2;->val$ctx:Landroid/content/Context;
 
     iput-object p2, p0, Lcom/bereal/dcimsaver/FeedDownloader$2;->val$post:Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;
@@ -54,7 +54,7 @@
 .method public run()V
     .locals 5
 
-    .line 184
+    .line 194
     iget-object v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$2;->val$ctx:Landroid/content/Context;
 
     iget-object v1, p0, Lcom/bereal/dcimsaver/FeedDownloader$2;->val$post:Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;
@@ -69,16 +69,16 @@
 
     move-result v0
 
-    .line 185
+    .line 195
     nop
 
-    .line 188
+    .line 198
     iget-object v1, p0, Lcom/bereal/dcimsaver/FeedDownloader$2;->val$ctx:Landroid/content/Context;
 
-    .line 185
+    .line 195
     if-lez v0, :cond_0
 
-    .line 186
+    .line 196
     new-instance v2, Ljava/lang/StringBuilder;
 
     const-string v3, "Saved "
@@ -89,7 +89,7 @@
 
     move-result-object v0
 
-    const-string v2, " file(s) from "
+    const-string v2, " file(s) with EXIF from "
 
     invoke-virtual {v0, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
@@ -117,10 +117,10 @@
 
     invoke-static {v1, v0}, Lcom/bereal/dcimsaver/FeedDownloader;->access$3(Landroid/content/Context;Ljava/lang/String;)V
 
-    .line 187
+    .line 197
     goto :goto_0
 
-    .line 188
+    .line 198
     :cond_0
     new-instance v0, Ljava/lang/StringBuilder;
 
@@ -144,7 +144,7 @@
 
     invoke-static {v1, v0}, Lcom/bereal/dcimsaver/FeedDownloader;->access$3(Landroid/content/Context;Ljava/lang/String;)V
 
-    .line 190
+    .line 200
     :goto_0
     return-void
 .end method

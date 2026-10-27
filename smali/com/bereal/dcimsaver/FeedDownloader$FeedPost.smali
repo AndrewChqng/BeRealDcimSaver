@@ -19,9 +19,15 @@
 
 .field public fullName:Ljava/lang/String;
 
+.field public latitude:Ljava/lang/Double;
+
+.field public longitude:Ljava/lang/Double;
+
 .field public ownerId:Ljava/lang/String;
 
 .field public postId:Ljava/lang/String;
+
+.field public postedAt:J
 
 .field public primaryBtsUrl:Ljava/lang/String;
 
@@ -44,7 +50,7 @@
 .method public constructor <init>()V
     .locals 0
 
-    .line 35
+    .line 36
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
     return-void
@@ -55,7 +61,7 @@
 .method public getDisplayUser()Ljava/lang/String;
     .locals 3
 
-    .line 50
+    .line 54
     iget-object v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;->userName:Ljava/lang/String;
 
     if-eqz v0, :cond_1
@@ -72,7 +78,7 @@
 
     if-nez v0, :cond_1
 
-    .line 51
+    .line 55
     iget-object v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;->fullName:Ljava/lang/String;
 
     const-string v1, "@"
@@ -101,7 +107,7 @@
 
     if-nez v0, :cond_0
 
-    .line 52
+    .line 56
     new-instance v0, Ljava/lang/StringBuilder;
 
     invoke-direct {v0, v1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
@@ -136,7 +142,7 @@
 
     return-object v0
 
-    .line 54
+    .line 58
     :cond_0
     new-instance v0, Ljava/lang/StringBuilder;
 
@@ -154,7 +160,7 @@
 
     return-object v0
 
-    .line 56
+    .line 60
     :cond_1
     iget-object v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;->fullName:Ljava/lang/String;
 
@@ -172,12 +178,12 @@
 
     if-nez v0, :cond_2
 
-    .line 57
+    .line 61
     iget-object v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;->fullName:Ljava/lang/String;
 
     return-object v0
 
-    .line 59
+    .line 63
     :cond_2
     iget-object v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;->ownerId:Ljava/lang/String;
 
@@ -197,7 +203,7 @@
 .method public getFormattedTime()Ljava/lang/String;
     .locals 5
 
-    .line 70
+    .line 74
     iget-wide v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;->takenAt:J
 
     const-wide/16 v2, 0x0
@@ -206,44 +212,35 @@
 
     if-gtz v0, :cond_0
 
-    .line 71
+    .line 75
     const-string v0, ""
 
     return-object v0
 
-    .line 73
+    .line 77
     :cond_0
     iget-wide v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;->takenAt:J
 
-    const-wide v2, 0x2540be400L
+    invoke-static {v0, v1}, Lcom/bereal/dcimsaver/ExifHelper;->normalizeEpochMs(J)J
 
-    cmp-long v0, v0, v2
+    move-result-wide v0
 
-    iget-wide v1, p0, Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;->takenAt:J
-
-    if-gez v0, :cond_1
-
-    const-wide/16 v3, 0x3e8
-
-    mul-long/2addr v1, v3
-
-    .line 75
-    :cond_1
+    .line 79
     :try_start_0
-    new-instance v0, Ljava/text/SimpleDateFormat;
+    new-instance v2, Ljava/text/SimpleDateFormat;
 
     const-string v3, "MMM d, HH:mm"
 
     sget-object v4, Ljava/util/Locale;->US:Ljava/util/Locale;
 
-    invoke-direct {v0, v3, v4}, Ljava/text/SimpleDateFormat;-><init>(Ljava/lang/String;Ljava/util/Locale;)V
+    invoke-direct {v2, v3, v4}, Ljava/text/SimpleDateFormat;-><init>(Ljava/lang/String;Ljava/util/Locale;)V
 
-    .line 76
+    .line 80
     new-instance v3, Ljava/util/Date;
 
-    invoke-direct {v3, v1, v2}, Ljava/util/Date;-><init>(J)V
+    invoke-direct {v3, v0, v1}, Ljava/util/Date;-><init>(J)V
 
-    invoke-virtual {v0, v3}, Ljava/text/SimpleDateFormat;->format(Ljava/util/Date;)Ljava/lang/String;
+    invoke-virtual {v2, v3}, Ljava/text/SimpleDateFormat;->format(Ljava/util/Date;)Ljava/lang/String;
 
     move-result-object v0
     :try_end_0
@@ -251,11 +248,11 @@
 
     return-object v0
 
-    .line 77
+    .line 81
     :catchall_0
     move-exception v0
 
-    .line 78
+    .line 82
     iget-wide v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;->takenAt:J
 
     invoke-static {v0, v1}, Ljava/lang/String;->valueOf(J)Ljava/lang/String;
@@ -268,7 +265,7 @@
 .method public getSafeUsername()Ljava/lang/String;
     .locals 3
 
-    .line 63
+    .line 67
     iget-object v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;->userName:Ljava/lang/String;
 
     if-eqz v0, :cond_0
@@ -285,12 +282,12 @@
 
     if-nez v0, :cond_0
 
-    .line 64
+    .line 68
     iget-object v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;->userName:Ljava/lang/String;
 
     goto :goto_0
 
-    .line 65
+    .line 69
     :cond_0
     iget-object v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;->ownerId:Ljava/lang/String;
 
@@ -303,11 +300,11 @@
     :cond_1
     const-string v0, "user"
 
-    .line 63
+    .line 67
     :goto_0
     nop
 
-    .line 66
+    .line 70
     const-string v1, "[^a-zA-Z0-9._-]"
 
     const-string v2, "_"
@@ -322,7 +319,7 @@
 .method public hasVideoOrBts()Z
     .locals 1
 
-    .line 83
+    .line 87
     iget-object v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;->primaryBtsUrl:Ljava/lang/String;
 
     invoke-static {v0}, Lcom/bereal/dcimsaver/FeedDownloader;->isNonEmpty(Ljava/lang/String;)Z
@@ -331,7 +328,7 @@
 
     if-nez v0, :cond_0
 
-    .line 84
+    .line 88
     iget-object v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;->secondaryBtsUrl:Ljava/lang/String;
 
     invoke-static {v0}, Lcom/bereal/dcimsaver/FeedDownloader;->isNonEmpty(Ljava/lang/String;)Z
@@ -340,7 +337,7 @@
 
     if-nez v0, :cond_0
 
-    .line 85
+    .line 89
     iget-object v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;->primaryVideoUrl:Ljava/lang/String;
 
     invoke-static {v0}, Lcom/bereal/dcimsaver/FeedDownloader;->isNonEmpty(Ljava/lang/String;)Z
@@ -349,7 +346,7 @@
 
     if-nez v0, :cond_0
 
-    .line 86
+    .line 90
     iget-object v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$FeedPost;->secondaryVideoUrl:Ljava/lang/String;
 
     invoke-static {v0}, Lcom/bereal/dcimsaver/FeedDownloader;->isNonEmpty(Ljava/lang/String;)Z
@@ -358,7 +355,7 @@
 
     if-nez v0, :cond_0
 
-    .line 83
+    .line 87
     const/4 v0, 0x0
 
     return v0

@@ -14,6 +14,7 @@ import android.provider.MediaStore;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,6 +39,9 @@ public final class FeedDownloader {
         public String userName;
         public String fullName;
         public long takenAt;
+        public long postedAt;
+        public Double latitude;
+        public Double longitude;
         public String caption;
         public String primaryPictureUrl;
         public String secondaryPictureUrl;
@@ -70,7 +74,7 @@ public final class FeedDownloader {
             if (takenAt <= 0L) {
                 return "";
             }
-            long ms = takenAt < 10000000000L ? takenAt * 1000L : takenAt;
+            long ms = ExifHelper.normalizeEpochMs(takenAt);
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("MMM d, HH:mm", Locale.US);
                 return sdf.format(new Date(ms));
@@ -117,7 +121,8 @@ public final class FeedDownloader {
                         err = "Database not initialized yet. Browse your BeReal feed first, then reopen this menu.";
                     } else {
                         String sql =
-                            "SELECT p.id, p.ownerId, u.userName, u.fullName, p.takenAt, p.caption, " +
+                            "SELECT p.id, p.ownerId, u.userName, u.fullName, p.takenAt, p.postedAt, " +
+                            "p.latitude, p.longitude, p.caption, " +
                             "p.primary_picture_url, p.secondary_picture_url, " +
                             "p.primary_btsMedia_url, p.secondary_btsMedia_url, " +
                             "p.primary_video_url, p.secondary_video_url " +
@@ -134,14 +139,19 @@ public final class FeedDownloader {
                                     fp.userName = getStr(c, 2);
                                     fp.fullName = getStr(c, 3);
                                     fp.takenAt = c.isNull(4) ? 0L : c.getLong(4);
-                                    fp.caption = getStr(c, 5);
-                                    fp.primaryPictureUrl = getStr(c, 6);
-                                    fp.secondaryPictureUrl = getStr(c, 7);
-                                    fp.primaryBtsUrl = getStr(c, 8);
-                                    fp.secondaryBtsUrl = getStr(c, 9);
-                                    fp.primaryVideoUrl = getStr(c, 10);
-                                    fp.secondaryVideoUrl = getStr(c, 11);
-                                    if (isNonEmpty(fp.primaryPictureUrl) || isNonEmpty(fp.secondaryPictureUrl) || fp.hasVideoOrBts()) {
+                                    fp.postedAt = c.isNull(5) ? fp.takenAt : c.getLong(5);
+                                    fp.latitude = c.isNull(6) ? null : Double.valueOf(c.getDouble(6));
+                                    fp.longitude = c.isNull(7) ? null : Double.valueOf(c.getDouble(7));
+                                    fp.caption = getStr(c, 8);
+                                    fp.primaryPictureUrl = getStr(c, 9);
+                                    fp.secondaryPictureUrl = getStr(c, 10);
+                                    fp.primaryBtsUrl = getStr(c, 11);
+                                    fp.secondaryBtsUrl = getStr(c, 12);
+                                    fp.primaryVideoUrl = getStr(c, 13);
+                                    fp.secondaryVideoUrl = getStr(c, 14);
+                                    if (isNonEmpty(fp.primaryPictureUrl)
+                                            || isNonEmpty(fp.secondaryPictureUrl)
+                                            || fp.hasVideoOrBts()) {
                                         list.add(fp);
                                     }
                                 }
@@ -183,7 +193,7 @@ public final class FeedDownloader {
             public void run() {
                 int count = downloadPostSync(ctx, post, dlPrimary, dlSecondary, dlVideoBts);
                 if (count > 0) {
-                    toast(ctx, "Saved " + count + " file(s) from " + post.getDisplayUser() + " to DCIM/BeReal");
+                    toast(ctx, "Saved " + count + " file(s) with EXIF from " + post.getDisplayUser() + " to DCIM/BeReal");
                 } else {
                     toast(ctx, "Failed to download media for " + post.getDisplayUser());
                 }
@@ -196,7 +206,7 @@ public final class FeedDownloader {
             toast(ctx, "No feed posts to download");
             return;
         }
-        toast(ctx, "Downloading " + posts.size() + " posts to DCIM/BeReal...");
+        toast(ctx, "Downloading " + posts.size() + " posts with EXIF to DCIM/BeReal...");
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -204,7 +214,7 @@ public final class FeedDownloader {
                 for (FeedPost p : posts) {
                     totalFiles += downloadPostSync(ctx, p, true, true, true);
                 }
-                toast(ctx, "Finished! Saved " + totalFiles + " files to DCIM/BeReal");
+                toast(ctx, "Finished! Saved " + totalFiles + " files with EXIF to DCIM/BeReal");
             }
         }).start();
     }
@@ -217,40 +227,41 @@ public final class FeedDownloader {
         boolean dlVideoBts
     ) {
         int savedCount = 0;
-        String base = "BeReal_" + post.getSafeUsername() + "_" + (post.takenAt > 0 ? post.takenAt : System.currentTimeMillis());
+        long tsMs = ExifHelper.normalizeEpochMs(post.takenAt);
+        String base = "BeReal_" + post.getSafeUsername() + "_" + tsMs;
 
         if (dlPrimary && isNonEmpty(post.primaryPictureUrl)) {
             String ext = guessImageExt(post.primaryPictureUrl);
             String mime = ".jpg".equals(ext) ? "image/jpeg" : "image/webp";
-            if (downloadUrlToDcim(ctx, post.primaryPictureUrl, base + "_primary" + ext, mime, false)) {
+            if (downloadUrlToDcim(ctx, post, "primary", post.primaryPictureUrl, base + "_primary" + ext, mime, false)) {
                 savedCount++;
             }
         }
         if (dlSecondary && isNonEmpty(post.secondaryPictureUrl)) {
             String ext = guessImageExt(post.secondaryPictureUrl);
             String mime = ".jpg".equals(ext) ? "image/jpeg" : "image/webp";
-            if (downloadUrlToDcim(ctx, post.secondaryPictureUrl, base + "_secondary" + ext, mime, false)) {
+            if (downloadUrlToDcim(ctx, post, "secondary", post.secondaryPictureUrl, base + "_secondary" + ext, mime, false)) {
                 savedCount++;
             }
         }
         if (dlVideoBts) {
             if (isNonEmpty(post.primaryBtsUrl)) {
-                if (downloadUrlToDcim(ctx, post.primaryBtsUrl, base + "_bts_primary.mp4", "video/mp4", true)) {
+                if (downloadUrlToDcim(ctx, post, "bts_primary", post.primaryBtsUrl, base + "_bts_primary.mp4", "video/mp4", true)) {
                     savedCount++;
                 }
             }
             if (isNonEmpty(post.secondaryBtsUrl)) {
-                if (downloadUrlToDcim(ctx, post.secondaryBtsUrl, base + "_bts_secondary.mp4", "video/mp4", true)) {
+                if (downloadUrlToDcim(ctx, post, "bts_secondary", post.secondaryBtsUrl, base + "_bts_secondary.mp4", "video/mp4", true)) {
                     savedCount++;
                 }
             }
             if (isNonEmpty(post.primaryVideoUrl)) {
-                if (downloadUrlToDcim(ctx, post.primaryVideoUrl, base + "_video_primary.mp4", "video/mp4", true)) {
+                if (downloadUrlToDcim(ctx, post, "video_primary", post.primaryVideoUrl, base + "_video_primary.mp4", "video/mp4", true)) {
                     savedCount++;
                 }
             }
             if (isNonEmpty(post.secondaryVideoUrl)) {
-                if (downloadUrlToDcim(ctx, post.secondaryVideoUrl, base + "_video_secondary.mp4", "video/mp4", true)) {
+                if (downloadUrlToDcim(ctx, post, "video_secondary", post.secondaryVideoUrl, base + "_video_secondary.mp4", "video/mp4", true)) {
                     savedCount++;
                 }
             }
@@ -260,6 +271,8 @@ public final class FeedDownloader {
 
     private static boolean downloadUrlToDcim(
         Context ctx,
+        FeedPost post,
+        String role,
         String urlStr,
         String outName,
         String mime,
@@ -267,7 +280,14 @@ public final class FeedDownloader {
     ) {
         HttpURLConnection conn = null;
         InputStream is = null;
+        File tempFile = null;
         try {
+            Context appCtx = ctx != null ? ctx : AndroidAppHelper.currentApplication();
+            File cacheDir = (appCtx != null && appCtx.getCacheDir() != null)
+                ? appCtx.getCacheDir()
+                : new File("/data/local/tmp");
+            tempFile = new File(cacheDir, "bereal_dl_" + System.nanoTime() + "_" + outName);
+
             URL url = new URL(urlStr);
             conn = (HttpURLConnection) url.openConnection();
             conn.setConnectTimeout(15000);
@@ -281,13 +301,34 @@ public final class FeedDownloader {
             }
             is = conn.getInputStream();
 
-            Context appCtx = ctx != null ? ctx : AndroidAppHelper.currentApplication();
+            FileOutputStream tempFos = new FileOutputStream(tempFile);
+            try {
+                byte[] buf = new byte[8192];
+                int n;
+                while ((n = is.read(buf)) > 0) {
+                    tempFos.write(buf, 0, n);
+                }
+                tempFos.getFD().sync();
+            } finally {
+                tempFos.close();
+            }
+
+            long takenMs = ExifHelper.normalizeEpochMs(post != null ? post.takenAt : 0L);
+
+            // Embed EXIF metadata (DateTimeOriginal, SubSec, OffsetTime, Artist, Caption, GPS, Camera Role)
+            if (!isVideo && post != null) {
+                ExifHelper.applyFeedPostExif(appCtx, tempFile, post, role);
+            } else {
+                tempFile.setLastModified(takenMs);
+            }
+
             if (appCtx != null && Build.VERSION.SDK_INT >= 29) {
                 ContentResolver resolver = appCtx.getContentResolver();
                 ContentValues values = new ContentValues();
                 values.put(MediaStore.MediaColumns.DISPLAY_NAME, outName);
                 values.put(MediaStore.MediaColumns.MIME_TYPE, mime);
                 values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DCIM + "/BeReal");
+                ExifHelper.populateMediaStoreTimestamps(values, takenMs);
                 values.put(MediaStore.MediaColumns.IS_PENDING, 1);
 
                 Uri collection = isVideo
@@ -297,20 +338,23 @@ public final class FeedDownloader {
                 if (itemUri != null) {
                     OutputStream os = resolver.openOutputStream(itemUri);
                     if (os != null) {
+                        FileInputStream fis = new FileInputStream(tempFile);
                         try {
                             byte[] buf = new byte[8192];
                             int n;
-                            while ((n = is.read(buf)) > 0) {
+                            while ((n = fis.read(buf)) > 0) {
                                 os.write(buf, 0, n);
                             }
                             os.flush();
                         } finally {
+                            fis.close();
                             os.close();
                         }
                         ContentValues done = new ContentValues();
+                        ExifHelper.populateMediaStoreTimestamps(done, takenMs);
                         done.put(MediaStore.MediaColumns.IS_PENDING, 0);
                         resolver.update(itemUri, done, null, null);
-                        XposedBridge.log(TAG + "Downloaded feed media -> DCIM/BeReal/" + outName);
+                        XposedBridge.log(TAG + "Downloaded feed media with EXIF -> DCIM/BeReal/" + outName);
                         return true;
                     }
                 }
@@ -323,18 +367,21 @@ public final class FeedDownloader {
                 dir.mkdirs();
             }
             File dst = new File(dir, outName);
+            FileInputStream fis = new FileInputStream(tempFile);
             FileOutputStream fos = new FileOutputStream(dst);
             try {
                 byte[] buf = new byte[8192];
                 int n;
-                while ((n = is.read(buf)) > 0) {
+                while ((n = fis.read(buf)) > 0) {
                     fos.write(buf, 0, n);
                 }
                 fos.getFD().sync();
             } finally {
+                fis.close();
                 fos.close();
             }
-            XposedBridge.log(TAG + "Downloaded feed media direct -> " + dst.getAbsolutePath());
+            dst.setLastModified(takenMs);
+            XposedBridge.log(TAG + "Downloaded feed media with EXIF direct -> " + dst.getAbsolutePath());
             return true;
         } catch (Throwable t) {
             XposedBridge.log(t);
@@ -345,6 +392,11 @@ public final class FeedDownloader {
             } catch (Throwable ignored) {}
             try {
                 if (conn != null) conn.disconnect();
+            } catch (Throwable ignored) {}
+            try {
+                if (tempFile != null && tempFile.exists()) {
+                    tempFile.delete();
+                }
             } catch (Throwable ignored) {}
         }
     }

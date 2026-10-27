@@ -31,7 +31,7 @@
 .method constructor <init>(Lcom/bereal/dcimsaver/FeedDownloader$1;Lcom/bereal/dcimsaver/FeedDownloader$PostsCallback;Ljava/util/List;Ljava/lang/String;)V
     .locals 0
 
-    .line 160
+    .line 170
     iput-object p1, p0, Lcom/bereal/dcimsaver/FeedDownloader$1$1;->this$1:Lcom/bereal/dcimsaver/FeedDownloader$1;
 
     iput-object p2, p0, Lcom/bereal/dcimsaver/FeedDownloader$1$1;->val$callback:Lcom/bereal/dcimsaver/FeedDownloader$PostsCallback;
@@ -50,7 +50,7 @@
 .method public run()V
     .locals 3
 
-    .line 163
+    .line 173
     iget-object v0, p0, Lcom/bereal/dcimsaver/FeedDownloader$1$1;->val$callback:Lcom/bereal/dcimsaver/FeedDownloader$PostsCallback;
 
     iget-object v1, p0, Lcom/bereal/dcimsaver/FeedDownloader$1$1;->val$list:Ljava/util/List;
@@ -59,6 +59,6 @@
 
     invoke-interface {v0, v1, v2}, Lcom/bereal/dcimsaver/FeedDownloader$PostsCallback;->onPostsLoaded(Ljava/util/List;Ljava/lang/String;)V
 
-    .line 164
+    .line 174
     return-void
 .end method
