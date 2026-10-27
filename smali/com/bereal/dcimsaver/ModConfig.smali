@@ -16,7 +16,7 @@
 
 .field public static final FORMAT_WEBP_100:I = 0x0
 
-.field private static final KEY_BYPASS_SIZE_CAP:Ljava/lang/String; = "bypass_size_cap"
+.field private static final KEY_BYPASS_SIZE_CAP:Ljava/lang/String; = "bypass_size_cap_v2"
 
 .field private static final KEY_FULL_RES_FORMAT:Ljava/lang/String; = "full_res_format"
 
@@ -26,7 +26,7 @@
 
 .field private static final KEY_SAVE_REALMOJIS:Ljava/lang/String; = "save_realmojis"
 
-.field private static final KEY_UPLOAD_RES_PRESET:Ljava/lang/String; = "upload_res_preset"
+.field private static final KEY_UPLOAD_RES_PRESET:Ljava/lang/String; = "upload_res_preset_v2"
 
 .field private static final KEY_UPLOAD_WEBP_QUALITY:Ljava/lang/String; = "upload_webp_quality"
 
@@ -76,24 +76,24 @@
     iput v0, p0, Lcom/bereal/dcimsaver/ModConfig;->saveMode:I
 
     .line 35
-    const/4 v1, 0x0
+    const/4 v0, 0x0
 
-    iput v1, p0, Lcom/bereal/dcimsaver/ModConfig;->fullResFormat:I
+    iput v0, p0, Lcom/bereal/dcimsaver/ModConfig;->fullResFormat:I
 
     .line 36
     iput v0, p0, Lcom/bereal/dcimsaver/ModConfig;->uploadResPreset:I
 
     .line 37
-    const/16 v0, 0x64
+    const/16 v1, 0x64
 
-    iput v0, p0, Lcom/bereal/dcimsaver/ModConfig;->uploadWebpQuality:I
+    iput v1, p0, Lcom/bereal/dcimsaver/ModConfig;->uploadWebpQuality:I
 
     .line 38
-    const/4 v0, 0x1
-
     iput-boolean v0, p0, Lcom/bereal/dcimsaver/ModConfig;->bypassSizeCap:Z
 
     .line 39
+    const/4 v0, 0x1
+
     iput-boolean v0, p0, Lcom/bereal/dcimsaver/ModConfig;->saveBtsVideos:Z
 
     .line 40
@@ -173,7 +173,7 @@
     iput v0, p1, Lcom/bereal/dcimsaver/ModConfig;->fullResFormat:I
 
     .line 101
-    const-string v0, "upload_res_preset"
+    const-string v0, "upload_res_preset_v2"
 
     iget v1, p1, Lcom/bereal/dcimsaver/ModConfig;->uploadResPreset:I
 
@@ -199,7 +199,7 @@
     iput v0, p1, Lcom/bereal/dcimsaver/ModConfig;->uploadWebpQuality:I
 
     .line 103
-    const-string v0, "bypass_size_cap"
+    const-string v0, "bypass_size_cap_v2"
 
     iget-boolean v1, p1, Lcom/bereal/dcimsaver/ModConfig;->bypassSizeCap:Z
 
@@ -286,9 +286,9 @@
     iput v1, v0, Lcom/bereal/dcimsaver/ModConfig;->fullResFormat:I
 
     .line 51
-    const-string v1, "upload_res_preset"
+    const-string v1, "upload_res_preset_v2"
 
-    invoke-interface {p0, v1, v3}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
+    invoke-interface {p0, v1, v2}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
 
     move-result v1
 
@@ -297,9 +297,9 @@
     .line 52
     const-string v1, "upload_webp_quality"
 
-    const/16 v2, 0x64
+    const/16 v3, 0x64
 
-    invoke-interface {p0, v1, v2}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
+    invoke-interface {p0, v1, v3}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
 
     move-result v1
 
@@ -310,9 +310,7 @@
     iput v1, v0, Lcom/bereal/dcimsaver/ModConfig;->uploadWebpQuality:I
 
     .line 53
-    const-string v1, "bypass_size_cap"
-
-    const/4 v2, 0x1
+    const-string v1, "bypass_size_cap_v2"
 
     invoke-interface {p0, v1, v2}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
 
@@ -322,6 +320,8 @@
 
     .line 54
     const-string v1, "save_bts_videos"
+
+    const/4 v2, 0x1
 
     invoke-interface {p0, v1, v2}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
 
@@ -399,7 +399,7 @@
     move-result-object p1
 
     .line 70
-    const-string v0, "upload_res_preset"
+    const-string v0, "upload_res_preset_v2"
 
     iget v1, p0, Lcom/bereal/dcimsaver/ModConfig;->uploadResPreset:I
 
@@ -421,7 +421,7 @@
     move-result-object p1
 
     .line 72
-    const-string v0, "bypass_size_cap"
+    const-string v0, "bypass_size_cap_v2"
 
     iget-boolean v1, p0, Lcom/bereal/dcimsaver/ModConfig;->bypassSizeCap:Z
 
@@ -560,7 +560,7 @@
     invoke-virtual {p1, v0, v1}, Landroid/content/Intent;->putExtra(Ljava/lang/String;I)Landroid/content/Intent;
 
     .line 87
-    const-string v0, "upload_res_preset"
+    const-string v0, "upload_res_preset_v2"
 
     iget v1, p0, Lcom/bereal/dcimsaver/ModConfig;->uploadResPreset:I
 
@@ -578,7 +578,7 @@
     invoke-virtual {p1, v1, v0}, Landroid/content/Intent;->putExtra(Ljava/lang/String;I)Landroid/content/Intent;
 
     .line 89
-    const-string v0, "bypass_size_cap"
+    const-string v0, "bypass_size_cap_v2"
 
     iget-boolean v1, p0, Lcom/bereal/dcimsaver/ModConfig;->bypassSizeCap:Z
 

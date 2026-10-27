@@ -33,8 +33,13 @@ An **Xposed / LSPosed module** for Android targeting **BeReal** (`com.bereal.ft`
    - `Lknm;->f` builds `Ldz9` with initial quality `d = 90` (`0x5a`) and size constraint `c = Lxg1;->a` (`Ljvb` = `LimitedTo(tryToReduceTo=700 KB, maxAccepted=700 KB)`).
    - If the compressed `.webp` exceeds **700 KB** (`0xaf000` bytes), `Llz9;->a` loops in steps of `-10` quality down to `50` and **throws a fatal `Lyb7` error** if still above 700 KB.
    - **Our Hook (`lz9.a` `beforeHookedMethod`)**:
-     - Overrides `dz9.d` (`quality`) with the user's configured WebP quality (`50–100`, default `100`).
-     - Replaces `dz9.c` with `Lkvb.a` (`Unlimited`), skipping the 700 KB recompression loop and writing directly to `FileOutputStream` at full resolution and quality.
+     - Overrides `dz9.d` (`quality`) with the user's configured initial WebP quality (`50–100`, default `100`).
+     - Optionally replaces `dz9.c` with `Lkvb.a` (`Unlimited`) if the user explicitly toggles **Bypass 700 KB Client Size Cap**.
+
+> [!WARNING]
+> **Server-Side 700 KB Upload Restriction**: BeReal's backend (and signed upload policy) rejects uploaded `.webp` files larger than **700 KB** (`716,800` bytes).
+> - By default, **Bypass 700 KB Client Size Cap** is **OFF** and the target upload resolution defaults to **`1080×1440`** with **100% initial WebP quality**, so `Llz9;->a` encodes at up to 100% quality when $\le$ 700 KB and automatically steps down quality if needed to pass server validation.
+> - **Local `DCIM/BeReal` Full-Resolution Sensor Dumps** (`BeReal_fullres_*`) are saved directly from the CameraX `Bitmap` before `Lgf2`/`Llz9` and are **never affected** by the 700 KB upload cap.
 
 ---
 
@@ -57,9 +62,9 @@ An **Xposed / LSPosed module** for Android targeting **BeReal** (`com.bereal.ft`
   - Save Behind-the-Scenes (BTS) Raw Videos (`BtsVideoRaw_*.mp4`) to `DCIM/BeReal` *(Default: ON)*
   - Save RealMoji Captures (`realmojis_temp/*.webp`) to `DCIM/BeReal` *(Default: ON)*
 - **Uploaded BeReal Post Quality Boost**:
-  - Target Upload Resolution: `1080×1440 (Default)`, `1440×1920 (2K QHD)`, `2160×2880 (4K UHD)` *(Default)*, or `Full Sensor Resolution (Max 3:4 Crop)`
-  - Upload WebP Compression Quality Slider: `50% – 100%` *(Default: 100%)*
-  - Bypass 700 KB Upload File Size Cap (`Unlimited` via `kvb.a`) *(Default: ON)*
+  - Target Upload Resolution: `1080×1440 (Default • Recommended for <700 KB)`, `1440×1920 (2K QHD)`, `2160×2880 (4K UHD)`, or `Full Sensor Resolution (Max 3:4 Crop)`
+  - Initial Upload WebP Compression Quality Slider: `50% – 100%` *(Default: 100%)*
+  - Bypass 700 KB Client Size Cap (`Unlimited` via `kvb.a` — ⚠️ Server rejects >700 KB) *(Default: OFF)*
 
 ---
 

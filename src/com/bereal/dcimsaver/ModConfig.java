@@ -25,17 +25,17 @@ public final class ModConfig {
 
     private static final String KEY_SAVE_MODE = "save_mode";
     private static final String KEY_FULL_RES_FORMAT = "full_res_format";
-    private static final String KEY_UPLOAD_RES_PRESET = "upload_res_preset";
+    private static final String KEY_UPLOAD_RES_PRESET = "upload_res_preset_v2";
     private static final String KEY_UPLOAD_WEBP_QUALITY = "upload_webp_quality";
-    private static final String KEY_BYPASS_SIZE_CAP = "bypass_size_cap";
+    private static final String KEY_BYPASS_SIZE_CAP = "bypass_size_cap_v2";
     private static final String KEY_SAVE_BTS_VIDEOS = "save_bts_videos";
     private static final String KEY_SAVE_REALMOJIS = "save_realmojis";
 
     public int saveMode = SAVE_MODE_BOTH;
     public int fullResFormat = FORMAT_WEBP_100;
-    public int uploadResPreset = UPLOAD_RES_2160;
+    public int uploadResPreset = UPLOAD_RES_1080;
     public int uploadWebpQuality = 100;
-    public boolean bypassSizeCap = true;
+    public boolean bypassSizeCap = false;
     public boolean saveBtsVideos = true;
     public boolean saveRealMojis = true;
 
@@ -48,9 +48,9 @@ public final class ModConfig {
             SharedPreferences sp = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
             cfg.saveMode = sp.getInt(KEY_SAVE_MODE, SAVE_MODE_BOTH);
             cfg.fullResFormat = sp.getInt(KEY_FULL_RES_FORMAT, FORMAT_WEBP_100);
-            cfg.uploadResPreset = sp.getInt(KEY_UPLOAD_RES_PRESET, UPLOAD_RES_2160);
+            cfg.uploadResPreset = sp.getInt(KEY_UPLOAD_RES_PRESET, UPLOAD_RES_1080);
             cfg.uploadWebpQuality = clampQuality(sp.getInt(KEY_UPLOAD_WEBP_QUALITY, 100));
-            cfg.bypassSizeCap = sp.getBoolean(KEY_BYPASS_SIZE_CAP, true);
+            cfg.bypassSizeCap = sp.getBoolean(KEY_BYPASS_SIZE_CAP, false);
             cfg.saveBtsVideos = sp.getBoolean(KEY_SAVE_BTS_VIDEOS, true);
             cfg.saveRealMojis = sp.getBoolean(KEY_SAVE_REALMOJIS, true);
         } catch (Throwable ignored) {

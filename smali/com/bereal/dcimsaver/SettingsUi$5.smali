@@ -29,7 +29,7 @@
 .method constructor <init>(Ljava/lang/Runnable;Landroid/content/Context;Lcom/bereal/dcimsaver/ModConfig;)V
     .locals 0
 
-    .line 228
+    .line 263
     iput-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$5;->val$collectAndSave:Ljava/lang/Runnable;
 
     iput-object p2, p0, Lcom/bereal/dcimsaver/SettingsUi$5;->val$ctx:Landroid/content/Context;
@@ -46,12 +46,12 @@
 .method public onClick(Landroid/view/View;)V
     .locals 4
 
-    .line 231
+    .line 266
     iget-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$5;->val$collectAndSave:Ljava/lang/Runnable;
 
     invoke-interface {p1}, Ljava/lang/Runnable;->run()V
 
-    .line 233
+    .line 268
     const/4 p1, 0x0
 
     :try_start_0
@@ -67,28 +67,28 @@
 
     move-result-object v0
 
-    .line 234
+    .line 269
     if-eqz v0, :cond_0
 
-    .line 235
+    .line 270
     iget-object v1, p0, Lcom/bereal/dcimsaver/SettingsUi$5;->val$cfg:Lcom/bereal/dcimsaver/ModConfig;
 
     invoke-virtual {v1, v0}, Lcom/bereal/dcimsaver/ModConfig;->writeToIntent(Landroid/content/Intent;)V
 
-    .line 236
+    .line 271
     const/high16 v1, 0x10000000
 
     invoke-virtual {v0, v1}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
 
-    .line 237
+    .line 272
     iget-object v1, p0, Lcom/bereal/dcimsaver/SettingsUi$5;->val$ctx:Landroid/content/Context;
 
     invoke-virtual {v1, v0}, Landroid/content/Context;->startActivity(Landroid/content/Intent;)V
 
-    .line 238
+    .line 273
     goto :goto_0
 
-    .line 239
+    .line 274
     :cond_0
     iget-object v0, p0, Lcom/bereal/dcimsaver/SettingsUi$5;->val$ctx:Landroid/content/Context;
 
@@ -102,13 +102,13 @@
     :try_end_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_0
 
-    .line 241
+    .line 276
     goto :goto_0
 
     :catchall_0
     move-exception v0
 
-    .line 242
+    .line 277
     iget-object v1, p0, Lcom/bereal/dcimsaver/SettingsUi$5;->val$ctx:Landroid/content/Context;
 
     new-instance v2, Ljava/lang/StringBuilder;
@@ -135,7 +135,7 @@
 
     invoke-virtual {p1}, Landroid/widget/Toast;->show()V
 
-    .line 244
+    .line 279
     :goto_0
     return-void
 .end method

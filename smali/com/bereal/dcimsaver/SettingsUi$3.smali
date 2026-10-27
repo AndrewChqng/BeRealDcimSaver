@@ -41,7 +41,7 @@
 .method constructor <init>(Lcom/bereal/dcimsaver/ModConfig;Landroid/widget/RadioGroup;Landroid/widget/RadioGroup;Landroid/widget/RadioGroup;Landroid/widget/SeekBar;Landroid/widget/CheckBox;Landroid/widget/CheckBox;Landroid/widget/CheckBox;Landroid/content/Context;)V
     .locals 0
 
-    .line 193
+    .line 228
     iput-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$cfg:Lcom/bereal/dcimsaver/ModConfig;
 
     iput-object p2, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$rgSaveMode:Landroid/widget/RadioGroup;
@@ -68,9 +68,9 @@
 
 # virtual methods
 .method public run()V
-    .locals 4
+    .locals 3
 
-    .line 196
+    .line 231
     iget-object v0, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$cfg:Lcom/bereal/dcimsaver/ModConfig;
 
     iget-object v1, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$rgSaveMode:Landroid/widget/RadioGroup;
@@ -83,20 +83,20 @@
 
     iput v1, v0, Lcom/bereal/dcimsaver/ModConfig;->saveMode:I
 
-    .line 197
+    .line 232
     iget-object v0, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$cfg:Lcom/bereal/dcimsaver/ModConfig;
 
     iget-object v1, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$rgFormat:Landroid/widget/RadioGroup;
 
-    const/4 v3, 0x0
+    const/4 v2, 0x0
 
-    invoke-static {v1, v3}, Lcom/bereal/dcimsaver/SettingsUi;->access$1(Landroid/widget/RadioGroup;I)I
+    invoke-static {v1, v2}, Lcom/bereal/dcimsaver/SettingsUi;->access$1(Landroid/widget/RadioGroup;I)I
 
     move-result v1
 
     iput v1, v0, Lcom/bereal/dcimsaver/ModConfig;->fullResFormat:I
 
-    .line 198
+    .line 233
     iget-object v0, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$cfg:Lcom/bereal/dcimsaver/ModConfig;
 
     iget-object v1, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$rgUploadRes:Landroid/widget/RadioGroup;
@@ -107,7 +107,7 @@
 
     iput v1, v0, Lcom/bereal/dcimsaver/ModConfig;->uploadResPreset:I
 
-    .line 199
+    .line 234
     iget-object v0, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$cfg:Lcom/bereal/dcimsaver/ModConfig;
 
     iget-object v1, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$sbQuality:Landroid/widget/SeekBar;
@@ -120,7 +120,7 @@
 
     iput v1, v0, Lcom/bereal/dcimsaver/ModConfig;->uploadWebpQuality:I
 
-    .line 200
+    .line 235
     iget-object v0, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$cfg:Lcom/bereal/dcimsaver/ModConfig;
 
     iget-object v1, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$cbBypassCap:Landroid/widget/CheckBox;
@@ -131,7 +131,7 @@
 
     iput-boolean v1, v0, Lcom/bereal/dcimsaver/ModConfig;->bypassSizeCap:Z
 
-    .line 201
+    .line 236
     iget-object v0, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$cfg:Lcom/bereal/dcimsaver/ModConfig;
 
     iget-object v1, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$cbBts:Landroid/widget/CheckBox;
@@ -142,7 +142,7 @@
 
     iput-boolean v1, v0, Lcom/bereal/dcimsaver/ModConfig;->saveBtsVideos:Z
 
-    .line 202
+    .line 237
     iget-object v0, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$cfg:Lcom/bereal/dcimsaver/ModConfig;
 
     iget-object v1, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$cbRealMojis:Landroid/widget/CheckBox;
@@ -153,13 +153,13 @@
 
     iput-boolean v1, v0, Lcom/bereal/dcimsaver/ModConfig;->saveRealMojis:Z
 
-    .line 203
+    .line 238
     iget-object v0, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$cfg:Lcom/bereal/dcimsaver/ModConfig;
 
     iget-object v1, p0, Lcom/bereal/dcimsaver/SettingsUi$3;->val$ctx:Landroid/content/Context;
 
     invoke-virtual {v0, v1}, Lcom/bereal/dcimsaver/ModConfig;->saveAndBroadcast(Landroid/content/Context;)V
 
-    .line 204
+    .line 239
     return-void
 .end method

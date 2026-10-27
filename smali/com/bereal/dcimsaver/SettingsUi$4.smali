@@ -29,7 +29,7 @@
 .method constructor <init>(Ljava/lang/Runnable;Landroid/content/Context;Ljava/lang/Runnable;)V
     .locals 0
 
-    .line 209
+    .line 244
     iput-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$collectAndSave:Ljava/lang/Runnable;
 
     iput-object p2, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$ctx:Landroid/content/Context;
@@ -46,12 +46,12 @@
 .method public onClick(Landroid/view/View;)V
     .locals 2
 
-    .line 212
+    .line 247
     iget-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$collectAndSave:Ljava/lang/Runnable;
 
     invoke-interface {p1}, Ljava/lang/Runnable;->run()V
 
-    .line 213
+    .line 248
     iget-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$ctx:Landroid/content/Context;
 
     const-string v0, "BeReal Mod settings saved!"
@@ -64,17 +64,17 @@
 
     invoke-virtual {p1}, Landroid/widget/Toast;->show()V
 
-    .line 214
+    .line 249
     iget-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$onCloseCallback:Ljava/lang/Runnable;
 
     if-eqz p1, :cond_0
 
-    .line 215
+    .line 250
     iget-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$onCloseCallback:Ljava/lang/Runnable;
 
     invoke-interface {p1}, Ljava/lang/Runnable;->run()V
 
-    .line 217
+    .line 252
     :cond_0
     return-void
 .end method

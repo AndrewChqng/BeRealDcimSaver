@@ -25,7 +25,7 @@
 .method constructor <init>(Landroid/widget/TextView;)V
     .locals 0
 
-    .line 164
+    .line 199
     iput-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$2;->val$tvQualityLabel:Landroid/widget/TextView;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -38,15 +38,15 @@
 .method public onProgressChanged(Landroid/widget/SeekBar;IZ)V
     .locals 1
 
-    .line 167
+    .line 202
     add-int/lit8 p2, p2, 0x32
 
-    .line 168
+    .line 203
     iget-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$2;->val$tvQualityLabel:Landroid/widget/TextView;
 
     new-instance p3, Ljava/lang/StringBuilder;
 
-    const-string v0, "Upload WebP Compression Quality: "
+    const-string v0, "Initial Upload WebP Quality: "
 
     invoke-direct {p3, v0}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
 
@@ -66,20 +66,20 @@
 
     invoke-virtual {p1, p2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 
-    .line 169
+    .line 204
     return-void
 .end method
 
 .method public onStartTrackingTouch(Landroid/widget/SeekBar;)V
     .locals 0
 
-    .line 171
+    .line 206
     return-void
 .end method
 
 .method public onStopTrackingTouch(Landroid/widget/SeekBar;)V
     .locals 0
 
-    .line 173
+    .line 208
     return-void
 .end method

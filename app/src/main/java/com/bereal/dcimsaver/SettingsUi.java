@@ -140,12 +140,47 @@ public final class SettingsUi {
 
         addSectionHeader(ctx, uploadCard, "2. Uploaded BeReal Post Quality Boost");
 
+        // Prominent Server-Side 700 KB Restriction Warning Banner
+        LinearLayout warningBanner = new LinearLayout(ctx);
+        warningBanner.setOrientation(LinearLayout.VERTICAL);
+        int wPad = dp(ctx, 12);
+        warningBanner.setPadding(wPad, wPad, wPad, wPad);
+        GradientDrawable warnBg = new GradientDrawable();
+        warnBg.setColor(0xFF2B1C14);
+        warnBg.setCornerRadius(dp(ctx, 10));
+        warnBg.setStroke(dp(ctx, 1), 0xFFFF9800);
+        warningBanner.setBackground(warnBg);
+
+        TextView warnTitle = new TextView(ctx);
+        warnTitle.setText("⚠️ Server-Side 700 KB Upload Limit");
+        warnTitle.setTextColor(0xFFFFB74D);
+        warnTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+        warnTitle.setTypeface(Typeface.DEFAULT_BOLD);
+        warningBanner.addView(warnTitle);
+
+        TextView warnBody = new TextView(ctx);
+        warnBody.setText("BeReal's servers strictly reject uploaded .webp files larger than 700 KB. "
+            + "For reliable uploads, keep '1080 × 1440' selected and leave 'Bypass 700 KB Cap' UNCHECKED "
+            + "so BeReal starts at your chosen WebP quality and automatically steps down if needed to fit under 700 KB. "
+            + "(Your local Full-Res DCIM/BeReal photos are completely unaffected by this limit.)");
+        warnBody.setTextColor(0xFFFFE0B2);
+        warnBody.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.5f);
+        warnBody.setPadding(0, dp(ctx, 4), 0, 0);
+        warningBanner.addView(warnBody);
+
+        LinearLayout.LayoutParams warnParams = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        warnParams.bottomMargin = dp(ctx, 12);
+        uploadCard.addView(warningBanner, warnParams);
+
         addLabel(ctx, uploadCard, "Target Upload Resolution (3:4 Aspect):");
         final RadioGroup rgUploadRes = createRadioGroup(ctx, new String[]{
-            "1080 × 1440 (BeReal Default)",
-            "1440 × 1920 (2K QHD Boost)",
-            "2160 × 2880 (4K UHD Boost)",
-            "Full Sensor Resolution (Max 3:4 Crop)"
+            "1080 × 1440 (BeReal Default • Recommended for <700 KB)",
+            "1440 × 1920 (2K QHD • May exceed 700 KB)",
+            "2160 × 2880 (4K UHD • Exceeds 700 KB)",
+            "Full Sensor Resolution (Max 3:4 Crop • Exceeds 700 KB)"
         }, cfg.uploadResPreset);
         uploadCard.addView(rgUploadRes);
 
@@ -154,7 +189,7 @@ public final class SettingsUi {
         tvQualityLabel.setTextColor(0xFFEEEEEE);
         tvQualityLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
         tvQualityLabel.setTypeface(Typeface.DEFAULT_BOLD);
-        tvQualityLabel.setText("Upload WebP Compression Quality: " + cfg.uploadWebpQuality + "%");
+        tvQualityLabel.setText("Initial Upload WebP Quality: " + cfg.uploadWebpQuality + "%");
         uploadCard.addView(tvQualityLabel);
 
         final SeekBar sbQuality = new SeekBar(ctx);
@@ -165,7 +200,7 @@ public final class SettingsUi {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 int q = 50 + progress;
-                tvQualityLabel.setText("Upload WebP Compression Quality: " + q + "%");
+                tvQualityLabel.setText("Initial Upload WebP Quality: " + q + "%");
             }
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {}
@@ -177,14 +212,14 @@ public final class SettingsUi {
         addSpacer(ctx, uploadCard, 6);
         final CheckBox cbBypassCap = createCheckBox(
             ctx,
-            "Bypass 700 KB Upload File Size Cap (Unlimited)",
+            "Bypass 700 KB Client Size Cap (⚠️ Server rejects >700 KB)",
             cfg.bypassSizeCap
         );
         uploadCard.addView(cbBypassCap);
 
         TextView capHint = new TextView(ctx);
-        capHint.setText("Required for 2K/4K/Full-Res uploads so BeReal does not recompress down to 50% quality or fail above 700 KB.");
-        capHint.setTextColor(0xFF888888);
+        capHint.setText("⚠️ Warning: Enabling this disables client-side 700 KB auto-reduction, which will cause BeReal's server to reject uploads larger than 700 KB.");
+        capHint.setTextColor(0xFFFF8A80);
         capHint.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
         capHint.setPadding(dp(ctx, 8), dp(ctx, 2), 0, dp(ctx, 4));
         uploadCard.addView(capHint);
@@ -195,7 +230,7 @@ public final class SettingsUi {
             public void run() {
                 cfg.saveMode = getSelectedIndex(rgSaveMode, ModConfig.SAVE_MODE_BOTH);
                 cfg.fullResFormat = getSelectedIndex(rgFormat, ModConfig.FORMAT_WEBP_100);
-                cfg.uploadResPreset = getSelectedIndex(rgUploadRes, ModConfig.UPLOAD_RES_2160);
+                cfg.uploadResPreset = getSelectedIndex(rgUploadRes, ModConfig.UPLOAD_RES_1080);
                 cfg.uploadWebpQuality = 50 + sbQuality.getProgress();
                 cfg.bypassSizeCap = cbBypassCap.isChecked();
                 cfg.saveBtsVideos = cbBts.isChecked();
