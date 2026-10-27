@@ -27,7 +27,7 @@
 .method constructor <init>(Lcom/bereal/dcimsaver/SettingsUi$1;Landroid/app/AlertDialog;)V
     .locals 0
 
-    .line 39
+    .line 46
     iput-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$1$1;->this$1:Lcom/bereal/dcimsaver/SettingsUi$1;
 
     iput-object p2, p0, Lcom/bereal/dcimsaver/SettingsUi$1$1;->val$dialog:Landroid/app/AlertDialog;
@@ -42,7 +42,7 @@
 .method public run()V
     .locals 1
 
-    .line 42
+    .line 49
     iget-object v0, p0, Lcom/bereal/dcimsaver/SettingsUi$1$1;->val$dialog:Landroid/app/AlertDialog;
 
     invoke-virtual {v0}, Landroid/app/AlertDialog;->isShowing()Z
@@ -51,12 +51,12 @@
 
     if-eqz v0, :cond_0
 
-    .line 43
+    .line 50
     iget-object v0, p0, Lcom/bereal/dcimsaver/SettingsUi$1$1;->val$dialog:Landroid/app/AlertDialog;
 
     invoke-virtual {v0}, Landroid/app/AlertDialog;->dismiss()V
 
-    .line 45
+    .line 52
     :cond_0
     return-void
 .end method

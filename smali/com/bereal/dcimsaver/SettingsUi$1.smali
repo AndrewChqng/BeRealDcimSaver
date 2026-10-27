@@ -25,7 +25,7 @@
 .method constructor <init>(Landroid/app/Activity;)V
     .locals 0
 
-    .line 31
+    .line 38
     iput-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$1;->val$activity:Landroid/app/Activity;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -38,24 +38,24 @@
 .method public run()V
     .locals 4
 
-    .line 35
+    .line 42
     :try_start_0
     new-instance v0, Landroid/app/AlertDialog$Builder;
 
-    .line 36
+    .line 43
     iget-object v1, p0, Lcom/bereal/dcimsaver/SettingsUi$1;->val$activity:Landroid/app/Activity;
 
-    .line 35
+    .line 42
     const v2, 0x10302d1
 
     invoke-direct {v0, v1, v2}, Landroid/app/AlertDialog$Builder;-><init>(Landroid/content/Context;I)V
 
-    .line 38
+    .line 45
     invoke-virtual {v0}, Landroid/app/AlertDialog$Builder;->create()Landroid/app/AlertDialog;
 
     move-result-object v0
 
-    .line 39
+    .line 46
     iget-object v1, p0, Lcom/bereal/dcimsaver/SettingsUi$1;->val$activity:Landroid/app/Activity;
 
     new-instance v2, Lcom/bereal/dcimsaver/SettingsUi$1$1;
@@ -68,30 +68,30 @@
 
     move-result-object v1
 
-    .line 47
+    .line 54
     invoke-virtual {v0, v1}, Landroid/app/AlertDialog;->setView(Landroid/view/View;)V
 
-    .line 48
+    .line 55
     invoke-virtual {v0}, Landroid/app/AlertDialog;->show()V
 
-    .line 49
+    .line 56
     invoke-virtual {v0}, Landroid/app/AlertDialog;->getWindow()Landroid/view/Window;
 
     move-result-object v1
 
     if-eqz v1, :cond_0
 
-    .line 50
+    .line 57
     new-instance v1, Landroid/graphics/drawable/GradientDrawable;
 
     invoke-direct {v1}, Landroid/graphics/drawable/GradientDrawable;-><init>()V
 
-    .line 51
+    .line 58
     const v2, -0xededec
 
     invoke-virtual {v1, v2}, Landroid/graphics/drawable/GradientDrawable;->setColor(I)V
 
-    .line 52
+    .line 59
     iget-object v2, p0, Lcom/bereal/dcimsaver/SettingsUi$1;->val$activity:Landroid/app/Activity;
 
     const/16 v3, 0x10
@@ -104,7 +104,7 @@
 
     invoke-virtual {v1, v2}, Landroid/graphics/drawable/GradientDrawable;->setCornerRadius(F)V
 
-    .line 53
+    .line 60
     invoke-virtual {v0}, Landroid/app/AlertDialog;->getWindow()Landroid/view/Window;
 
     move-result-object v0
@@ -115,14 +115,14 @@
 
     goto :goto_0
 
-    .line 55
+    .line 62
     :catchall_0
     move-exception v0
 
     :goto_0
     nop
 
-    .line 57
+    .line 64
     :cond_0
     return-void
 .end method

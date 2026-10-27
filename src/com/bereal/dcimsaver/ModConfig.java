@@ -9,6 +9,7 @@ public final class ModConfig {
     public static final String ACTION_SYNC_PREFS = "com.bereal.dcimsaver.ACTION_SYNC_PREFS";
     public static final String EXTRA_SYNC_PREFS = "sync_bereal_dcim_prefs";
     public static final String EXTRA_OPEN_SETTINGS = "open_bereal_dcim_settings";
+    public static final String EXTRA_OPEN_DOWNLOADER = "open_bereal_feed_downloader";
 
     public static final int SAVE_MODE_PROCESSED = 0;
     public static final int SAVE_MODE_FULL_RES = 1;

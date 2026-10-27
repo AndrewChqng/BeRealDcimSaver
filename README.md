@@ -4,7 +4,8 @@ An **Xposed / LSPosed module** for Android targeting **BeReal** (`com.bereal.ft`
 1. **Dumps Full-Resolution Raw Camera Sensor Captures** (`12 MP` / `4096×3072` back & `8 MP` front `Bitmap` frames) to `/sdcard/DCIM/BeReal/` **before** BeReal downscales and recycles them.
 2. **Boosts Uploaded BeReal Post Resolution & Quality** — overrides the hardcoded `1080×1440` (`0x438` × `0x5a0`) downscale target up to **2K (`1440×1920`)**, **4K (`2160×2880`)**, or **Full Sensor 3:4**, sets custom WebP compression quality (`50%–100%`), and bypasses BeReal's **700 KB upload file size cap** (`Lxg1` $\rightarrow$ `Lkvb.a` `Unlimited`).
 3. **Exports Processed Captures, BTS Videos & RealMojis** — automatically saves `files/camera/*.webp`, Behind-the-Scenes raw videos (`BtsVideoRaw_*.mp4`), and `realmojis_temp/*.webp` to `/sdcard/DCIM/BeReal/`.
-4. **Dual Configuration UI** — includes both a **Standalone Settings App** (launcher + LSPosed Manager module settings) and an **In-App Settings Dialog** inside BeReal (triggered by **long-pressing the top-center `"BeReal."` header logo** for ~600ms).
+4. **Downloads Other Users' Primary / Secondary / BTS Posts (`FeedDownloader`)** — hooks BeReal's SQLCipher-encrypted `CoreDatabase` (`PostEntity` joined with `UserEntity`) in-process so you can browse/search active feed posts and memories by `@username` and save any user's Primary photo, Secondary photo, or BTS video directly to `/sdcard/DCIM/BeReal/`.
+5. **Dual Configuration UI** — includes both a **Standalone Settings App** (launcher + LSPosed Manager module settings) and an **In-App Settings & Downloader Dialog** inside BeReal (triggered by **long-pressing the top-center `"BeReal."` header logo** for ~600ms).
 
 ---
 

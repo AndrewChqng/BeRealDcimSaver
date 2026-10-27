@@ -22,7 +22,7 @@
 .method constructor <init>(Lcom/bereal/dcimsaver/MainHook;)V
     .locals 0
 
-    .line 153
+    .line 157
     iput-object p1, p0, Lcom/bereal/dcimsaver/MainHook$4;->this$0:Lcom/bereal/dcimsaver/MainHook;
 
     invoke-direct {p0}, Lde/robv/android/xposed/XC_MethodHook;-><init>()V
@@ -40,12 +40,12 @@
         }
     .end annotation
 
-    .line 156
+    .line 160
     iget-object v0, p1, Lde/robv/android/xposed/XC_MethodHook$MethodHookParam;->thisObject:Ljava/lang/Object;
 
     check-cast v0, Landroid/app/Activity;
 
-    .line 157
+    .line 161
     if-eqz v0, :cond_2
 
     iget-object v1, p0, Lcom/bereal/dcimsaver/MainHook$4;->this$0:Lcom/bereal/dcimsaver/MainHook;
@@ -58,7 +58,7 @@
 
     goto :goto_0
 
-    .line 160
+    .line 164
     :cond_0
     iget-object p1, p1, Lde/robv/android/xposed/XC_MethodHook$MethodHookParam;->args:[Ljava/lang/Object;
 
@@ -68,22 +68,22 @@
 
     check-cast p1, Landroid/view/MotionEvent;
 
-    .line 161
+    .line 165
     if-nez p1, :cond_1
 
-    .line 162
+    .line 166
     return-void
 
-    .line 164
+    .line 168
     :cond_1
     iget-object v1, p0, Lcom/bereal/dcimsaver/MainHook$4;->this$0:Lcom/bereal/dcimsaver/MainHook;
 
     invoke-static {v1, v0, p1}, Lcom/bereal/dcimsaver/MainHook;->access$3(Lcom/bereal/dcimsaver/MainHook;Landroid/app/Activity;Landroid/view/MotionEvent;)V
 
-    .line 165
+    .line 169
     return-void
 
-    .line 158
+    .line 162
     :cond_2
     :goto_0
     return-void

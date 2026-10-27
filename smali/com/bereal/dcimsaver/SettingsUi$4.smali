@@ -3,12 +3,12 @@
 .source "SettingsUi.java"
 
 # interfaces
-.implements Landroid/view/View$OnClickListener;
+.implements Ljava/lang/Runnable;
 
 
 # annotations
 .annotation system Ldalvik/annotation/EnclosingMethod;
-    value = Lcom/bereal/dcimsaver/SettingsUi;->buildSettingsView(Landroid/content/Context;ZLjava/lang/Runnable;)Landroid/view/View;
+    value = Lcom/bereal/dcimsaver/SettingsUi;->buildFeedDownloaderView(Landroid/app/Activity;Landroid/app/AlertDialog;)Landroid/view/View;
 .end annotation
 
 .annotation system Ldalvik/annotation/InnerClass;
@@ -18,23 +18,23 @@
 
 
 # instance fields
-.field private final synthetic val$collectAndSave:Ljava/lang/Runnable;
+.field private final synthetic val$allPosts:Ljava/util/List;
 
-.field private final synthetic val$ctx:Landroid/content/Context;
+.field private final synthetic val$renderList:Ljava/lang/Runnable;
 
-.field private final synthetic val$onCloseCallback:Ljava/lang/Runnable;
+.field private final synthetic val$statusTv:Landroid/widget/TextView;
 
 
 # direct methods
-.method constructor <init>(Ljava/lang/Runnable;Landroid/content/Context;Ljava/lang/Runnable;)V
+.method constructor <init>(Landroid/widget/TextView;Ljava/util/List;Ljava/lang/Runnable;)V
     .locals 0
 
-    .line 244
-    iput-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$collectAndSave:Ljava/lang/Runnable;
+    .line 293
+    iput-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$statusTv:Landroid/widget/TextView;
 
-    iput-object p2, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$ctx:Landroid/content/Context;
+    iput-object p2, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$allPosts:Ljava/util/List;
 
-    iput-object p3, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$onCloseCallback:Ljava/lang/Runnable;
+    iput-object p3, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$renderList:Ljava/lang/Runnable;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
@@ -43,38 +43,29 @@
 
 
 # virtual methods
-.method public onClick(Landroid/view/View;)V
-    .locals 2
+.method public run()V
+    .locals 4
 
-    .line 247
-    iget-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$collectAndSave:Ljava/lang/Runnable;
+    .line 296
+    iget-object v0, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$statusTv:Landroid/widget/TextView;
 
-    invoke-interface {p1}, Ljava/lang/Runnable;->run()V
+    const-string v1, "Querying BeReal feed database..."
 
-    .line 248
-    iget-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$ctx:Landroid/content/Context;
+    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 
-    const-string v0, "BeReal Mod settings saved!"
+    .line 297
+    new-instance v0, Lcom/bereal/dcimsaver/SettingsUi$4$1;
 
-    const/4 v1, 0x0
+    iget-object v1, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$allPosts:Ljava/util/List;
 
-    invoke-static {p1, v0, v1}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
+    iget-object v2, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$statusTv:Landroid/widget/TextView;
 
-    move-result-object p1
+    iget-object v3, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$renderList:Ljava/lang/Runnable;
 
-    invoke-virtual {p1}, Landroid/widget/Toast;->show()V
+    invoke-direct {v0, p0, v1, v2, v3}, Lcom/bereal/dcimsaver/SettingsUi$4$1;-><init>(Lcom/bereal/dcimsaver/SettingsUi$4;Ljava/util/List;Landroid/widget/TextView;Ljava/lang/Runnable;)V
 
-    .line 249
-    iget-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$onCloseCallback:Ljava/lang/Runnable;
+    invoke-static {v0}, Lcom/bereal/dcimsaver/FeedDownloader;->loadFeedPostsAsync(Lcom/bereal/dcimsaver/FeedDownloader$PostsCallback;)V
 
-    if-eqz p1, :cond_0
-
-    .line 250
-    iget-object p1, p0, Lcom/bereal/dcimsaver/SettingsUi$4;->val$onCloseCallback:Ljava/lang/Runnable;
-
-    invoke-interface {p1}, Ljava/lang/Runnable;->run()V
-
-    .line 252
-    :cond_0
+    .line 313
     return-void
 .end method

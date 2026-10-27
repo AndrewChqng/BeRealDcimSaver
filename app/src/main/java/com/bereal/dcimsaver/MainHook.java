@@ -62,6 +62,7 @@ public class MainHook implements IXposedHookLoadPackage {
 
         hookApplicationLifecycle();
         hookMainActivityUi();
+        hookCoreDatabase(lpparam.classLoader);
         hookCameraDownscaleAndFullRes(lpparam.classLoader);
         hookWebpCompressorAndSizeCap(lpparam.classLoader);
         hookFileExportTriggers();
@@ -137,7 +138,10 @@ public class MainHook implements IXposedHookLoadPackage {
                             cfg.save(activity);
                             intent.removeExtra(ModConfig.EXTRA_SYNC_PREFS);
                             XposedBridge.log(TAG + "Synced settings from launch intent");
-                            if (intent.getBooleanExtra(ModConfig.EXTRA_OPEN_SETTINGS, false)) {
+                            if (intent.getBooleanExtra(ModConfig.EXTRA_OPEN_DOWNLOADER, false)) {
+                                intent.removeExtra(ModConfig.EXTRA_OPEN_DOWNLOADER);
+                                SettingsUi.showFeedDownloaderDialog(activity);
+                            } else if (intent.getBooleanExtra(ModConfig.EXTRA_OPEN_SETTINGS, false)) {
                                 intent.removeExtra(ModConfig.EXTRA_OPEN_SETTINGS);
                                 SettingsUi.showInAppDialog(activity);
                             }
@@ -230,6 +234,41 @@ public class MainHook implements IXposedHookLoadPackage {
         if (pendingLongPress != null && mainHandler != null) {
             mainHandler.removeCallbacks(pendingLongPress);
             pendingLongPress = null;
+        }
+    }
+
+    private void hookCoreDatabase(ClassLoader cl) {
+        try {
+            Class<?> coreDbClass = XposedHelpers.findClassIfExists(
+                "bereal.app.platform.data.core.storage.data.db.CoreDatabase", cl
+            );
+            if (coreDbClass != null) {
+                XposedBridge.hookAllConstructors(coreDbClass, new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        if (param.thisObject != null) {
+                            FeedDownloader.setCoreDatabase(param.thisObject);
+                        }
+                    }
+                });
+            }
+
+            Class<?> roomDbClass = XposedHelpers.findClassIfExists(
+                "androidx.room.RoomDatabase", cl
+            );
+            if (roomDbClass != null) {
+                XposedBridge.hookAllMethods(roomDbClass, "init", new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        if (param.thisObject != null
+                                && param.thisObject.getClass().getName().contains("CoreDatabase")) {
+                            FeedDownloader.setCoreDatabase(param.thisObject);
+                        }
+                    }
+                });
+            }
+        } catch (Throwable t) {
+            XposedBridge.log(t);
         }
     }
 

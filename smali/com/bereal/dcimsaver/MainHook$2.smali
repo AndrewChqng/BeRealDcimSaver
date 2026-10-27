@@ -22,7 +22,7 @@
 .method constructor <init>(Lcom/bereal/dcimsaver/MainHook;)V
     .locals 0
 
-    .line 99
+    .line 100
     iput-object p1, p0, Lcom/bereal/dcimsaver/MainHook$2;->this$0:Lcom/bereal/dcimsaver/MainHook;
 
     invoke-direct {p0}, Landroid/content/BroadcastReceiver;-><init>()V
@@ -35,7 +35,7 @@
 .method public onReceive(Landroid/content/Context;Landroid/content/Intent;)V
     .locals 2
 
-    .line 102
+    .line 103
     if-eqz p2, :cond_0
 
     const-string v0, "com.bereal.dcimsaver.ACTION_SYNC_PREFS"
@@ -50,22 +50,22 @@
 
     if-eqz v0, :cond_0
 
-    .line 103
+    .line 104
     invoke-static {p2, p1}, Lcom/bereal/dcimsaver/ModConfig;->fromIntent(Landroid/content/Intent;Landroid/content/Context;)Lcom/bereal/dcimsaver/ModConfig;
 
     move-result-object p2
 
-    .line 104
+    .line 105
     invoke-virtual {p2, p1}, Lcom/bereal/dcimsaver/ModConfig;->save(Landroid/content/Context;)V
 
-    .line 105
+    .line 106
     new-instance p1, Ljava/lang/StringBuilder;
 
     const-string v0, "[BeRealDcimSaver] Synced settings via broadcast (saveMode="
 
     invoke-direct {p1, v0}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
 
-    .line 106
+    .line 107
     iget v0, p2, Lcom/bereal/dcimsaver/ModConfig;->saveMode:I
 
     invoke-virtual {p1, v0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
@@ -84,7 +84,7 @@
 
     move-result-object p1
 
-    .line 107
+    .line 108
     const-string v0, ", quality="
 
     invoke-virtual {p1, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
@@ -103,14 +103,14 @@
 
     move-result-object p1
 
-    .line 105
+    .line 106
     invoke-virtual {p1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
 
     move-result-object p1
 
     invoke-static {p1}, Lde/robv/android/xposed/XposedBridge;->log(Ljava/lang/String;)V
 
-    .line 109
+    .line 110
     :cond_0
     return-void
 .end method

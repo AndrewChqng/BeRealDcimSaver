@@ -27,7 +27,7 @@
 .method constructor <init>(Lcom/bereal/dcimsaver/MainHook$1;Landroid/app/Application;)V
     .locals 0
 
-    .line 83
+    .line 84
     iput-object p1, p0, Lcom/bereal/dcimsaver/MainHook$1$1;->this$1:Lcom/bereal/dcimsaver/MainHook$1;
 
     iput-object p2, p0, Lcom/bereal/dcimsaver/MainHook$1$1;->val$app:Landroid/app/Application;
@@ -42,11 +42,11 @@
 .method public run()V
     .locals 1
 
-    .line 86
+    .line 87
     iget-object v0, p0, Lcom/bereal/dcimsaver/MainHook$1$1;->val$app:Landroid/app/Application;
 
     invoke-static {v0}, Lcom/bereal/dcimsaver/MainHook;->access$1(Landroid/content/Context;)V
 
-    .line 87
+    .line 88
     return-void
 .end method

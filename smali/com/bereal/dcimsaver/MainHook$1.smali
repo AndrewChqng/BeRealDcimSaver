@@ -22,7 +22,7 @@
 .method constructor <init>(Lcom/bereal/dcimsaver/MainHook;)V
     .locals 0
 
-    .line 75
+    .line 76
     iput-object p1, p0, Lcom/bereal/dcimsaver/MainHook$1;->this$0:Lcom/bereal/dcimsaver/MainHook;
 
     invoke-direct {p0}, Lde/robv/android/xposed/XC_MethodHook;-><init>()V
@@ -40,12 +40,12 @@
         }
     .end annotation
 
-    .line 78
+    .line 79
     iget-object p1, p1, Lde/robv/android/xposed/XC_MethodHook$MethodHookParam;->thisObject:Ljava/lang/Object;
 
     check-cast p1, Landroid/app/Application;
 
-    .line 79
+    .line 80
     if-eqz p1, :cond_1
 
     const-string v0, "com.bereal.ft"
@@ -62,13 +62,13 @@
 
     goto :goto_0
 
-    .line 82
+    .line 83
     :cond_0
     iget-object v0, p0, Lcom/bereal/dcimsaver/MainHook$1;->this$0:Lcom/bereal/dcimsaver/MainHook;
 
     invoke-static {v0, p1}, Lcom/bereal/dcimsaver/MainHook;->access$0(Lcom/bereal/dcimsaver/MainHook;Landroid/app/Application;)V
 
-    .line 83
+    .line 84
     new-instance v0, Ljava/lang/Thread;
 
     new-instance v1, Lcom/bereal/dcimsaver/MainHook$1$1;
@@ -77,13 +77,13 @@
 
     invoke-direct {v0, v1}, Ljava/lang/Thread;-><init>(Ljava/lang/Runnable;)V
 
-    .line 88
+    .line 89
     invoke-virtual {v0}, Ljava/lang/Thread;->start()V
 
-    .line 89
+    .line 90
     return-void
 
-    .line 80
+    .line 81
     :cond_1
     :goto_0
     return-void
