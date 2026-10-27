@@ -10,7 +10,7 @@ apktool b -f "$SCRIPT_DIR" -o "$SCRIPT_DIR/dist/unsigned.apk"
 echo "[*] Zipaligning and signing APK..."
 zipalign -f -p 4 "$SCRIPT_DIR/dist/unsigned.apk" "$SCRIPT_DIR/dist/aligned.apk"
 
-KEYSTORE="$SCRIPT_DIR/dist/debug.keystore"
+KEYSTORE="$SCRIPT_DIR/debug.keystore"
 if [ ! -f "$KEYSTORE" ]; then
     keytool -genkeypair -v -keystore "$KEYSTORE" -storepass android -alias androiddebugkey \
         -keypass android -keyalg RSA -keysize 2048 -validity 10000 \
@@ -20,6 +20,6 @@ fi
 apksigner sign --ks "$KEYSTORE" --ks-pass pass:android --key-pass pass:android \
     --out "$SCRIPT_DIR/dist/bereal-dcim-lsposed.apk" "$SCRIPT_DIR/dist/aligned.apk"
 
-rm -f "$SCRIPT_DIR/dist/unsigned.apk" "$SCRIPT_DIR/dist/aligned.apk" "$KEYSTORE"
+rm -f "$SCRIPT_DIR/dist/unsigned.apk" "$SCRIPT_DIR/dist/aligned.apk"
 echo "[+] Done! Output APK:"
 echo "    $SCRIPT_DIR/dist/bereal-dcim-lsposed.apk"

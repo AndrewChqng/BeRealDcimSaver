@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BeReal DCIM Saver</string>
-    <string name="xposed_description">Saves original BeReal camera .webp photos (primary &amp; secondary) to DCIM/BeReal</string>
+    <string name="app_name">BeReal DCIM &amp; Quality Mod</string>
+    <string name="xposed_description">Saves full-res sensor photos, .webp captures, BTS videos &amp; RealMojis to DCIM/BeReal + boosts uploaded BeReal resolution &amp; quality</string>
 </resources>

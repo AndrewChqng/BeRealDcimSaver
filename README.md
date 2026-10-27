@@ -1,97 +1,84 @@
-# BeReal DCIM Saver (`BeRealDcimSaver`)
+# BeReal DCIM & Quality Mod (`BeRealDcimSaver`)
 
-An **Xposed / LSPosed module** for Android that automatically exports original **BeReal** (`com.bereal.ft`) camera `.webp` captures—both primary (back) and secondary (front) lenses, as well as instant/chat captures—directly to `/sdcard/DCIM/BeReal/`.
+An **Xposed / LSPosed module** for Android targeting **BeReal** (`com.bereal.ft` `v3.98.0+`) that:
+1. **Dumps Full-Resolution Raw Camera Sensor Captures** (`12 MP` / `4096×3072` back & `8 MP` front `Bitmap` frames) to `/sdcard/DCIM/BeReal/` **before** BeReal downscales and recycles them.
+2. **Boosts Uploaded BeReal Post Resolution & Quality** — overrides the hardcoded `1080×1440` (`0x438` × `0x5a0`) downscale target up to **2K (`1440×1920`)**, **4K (`2160×2880`)**, or **Full Sensor 3:4**, sets custom WebP compression quality (`50%–100%`), and bypasses BeReal's **700 KB upload file size cap** (`Lxg1` $\rightarrow$ `Lkvb.a` `Unlimited`).
+3. **Exports Processed Captures, BTS Videos & RealMojis** — automatically saves `files/camera/*.webp`, Behind-the-Scenes raw videos (`BtsVideoRaw_*.mp4`), and `realmojis_temp/*.webp` to `/sdcard/DCIM/BeReal/`.
+4. **Dual Configuration UI** — includes both a **Standalone Settings App** (launcher + LSPosed Manager module settings) and an **In-App Settings Dialog** inside BeReal (triggered by **long-pressing the top-center `"BeReal."` header logo** for ~600ms).
 
 ---
 
-## 1. Technical Analysis: How BeReal Stores Camera Files (`v3.98.0+`)
+## 1. Reverse-Engineered BeReal Camera & Compression Pipeline (`v3.98.0-3600852`)
 
-Reverse-engineering `com.bereal.ft` (`v3.98.0-3600852`) reveals that BeReal never writes unscaled sensor JPEGs to external storage during capture. Instead, all media directories are managed internally by [`Ltt7`](src/com/bereal/dcimsaver/MainHook.java) via directory enum `Lps7` and root selector `Lut7`:
+### Internal Storage Layout (`Ltt7` / `Lps7` / `Lut7`)
 
 | Enum (`Lps7`) | Root (`Lpu7`) | On-Device Path | Contents |
 | :--- | :--- | :--- | :--- |
-| `Camera` (`Lps7;->f`) | `FilesDirectory` (`Context.getFilesDir()`) | `/data/user/0/com.bereal.ft/files/camera/` | Original camera captures (`primary_<ts>.webp`, `secondary_<ts>.webp`, `instant_primary_<ts>.webp`, `instant_secondary_<ts>.webp`, `BtsVideoRaw_<ts>.mp4`) |
+| `Camera` (`Lps7;->f`) | `FilesDirectory` (`Context.getFilesDir()`) | `/data/user/0/com.bereal.ft/files/camera/` | Processed captures (`primary_<ts>.webp`, `secondary_<ts>.webp`, `instant_primary_<ts>.webp`, `instant_secondary_<ts>.webp`, `BtsVideoRaw_<ts>.mp4`, `BtsVideo_upload_<ts>.mp4`) |
 | `PostDraft` (`Lps7;->g`) | `FilesDirectory` (`Context.getFilesDir()`) | `/data/user/0/com.bereal.ft/files/post_drafts/` | Queued / draft posts (`<postId>_<idx>.webp`) |
-| `RealMojisCapture` (`Lps7;->b`) | `CacheDirectory` (`Context.getCacheDir()`) | `/data/user/0/com.bereal.ft/cache/realmojis_temp/` | Temporary RealMoji reaction captures |
+| `RealMojisCapture` (`Lps7;->b`) | `CacheDirectory` (`Context.getCacheDir()`) | `/data/user/0/com.bereal.ft/cache/realmojis_temp/` | Temporary RealMoji reaction captures (`*.webp`) |
 | `ProcessingCache` (`Lps7;->n`) | `CacheDirectory` (`Context.getCacheDir()`) | `/data/user/0/com.bereal.ft/cache/processing/` | Intermediate transcoding / compositing files |
 
-### Capture & Encoding Pipeline
-1. **In-Memory Capture**: CameraX `ImageCapture` (`Lgf2;->d`) captures the frame in memory and scales/crops it to `1080x1440` (`Lgf2;->a` $\rightarrow$ `Lis4;->w`).
-2. **WebP Encoding**: `Lknm;->f(Ltf2;Ljava/io/File;)Lyo6;` passes the `Bitmap` and target `File` (`/data/user/0/com.bereal.ft/files/camera/{primary,secondary}_<timestamp>.webp`) to `Llz9;->a(Landroid/graphics/Bitmap;Ldz9;)Lyo6;`, which encodes the image as **WebP (quality 90)** via `FileOutputStream`.
-3. **URI Handoff & Cleanup**: Immediately after closing the `FileOutputStream`, `Llz9;->a` invokes `android.net.Uri.fromFile(File)` on the `.webp` file. Once the post is uploaded or discarded, `Lrm2` / `Lf7k` wipes `files/camera/`.
+### Three-Stage Image Quality Bottleneck & How This Module Hooks Each Stage
+
+1. **Stage 1 — Full-Resolution Hardware Capture (`Lao2;->c` & `Lff2;->c`)**:
+   - `Lao2;->c(Z)Landroid/util/Size;` queries `StreamConfigurationMap.getOutputSizes(0x100)` (JPEG) and selects the **largest 4:3 hardware sensor resolution** (e.g., `4096×3072` / 12 MP).
+   - `Lff2;->c(Landroidx/camera/core/ImageProxy;)V` decodes the `ImageProxy` into a full-resolution `Bitmap` (`Lmy9;->a`).
+2. **Stage 2 — Hardcoded `1080×1440` Downscale (`Lknm;->d` $\rightarrow$ `Lgf2;->a` $\rightarrow$ `Lis4;->w`)**:
+   - `Lknm;->d` passes `p3 = 1080` (`0x438`) and `p4 = 1440` (`0x5a0`) into `Lgf2;->d` $\rightarrow$ `Lgf2;->a(Landroid/graphics/Bitmap;FZII)Lr1n;`. Immediately after `Lgf2;->d` returns, `Lff2;->c` calls `Bitmap.recycle()` on the full-resolution sensor `Bitmap`.
+   - **Our Hook (`gf2.a` `beforeHookedMethod`)**:
+     - Applies the exact rotation (`rotationDegrees`) and mirror (`flipHorizontally`) matrix to the full-resolution `Bitmap`, creates an independent copy before `ff2.c` recycles the source, and encodes it on a background thread to `DCIM/BeReal/BeReal_fullres_{primary|secondary}_<ts>.{webp|jpg|png}` at **100% quality**.
+     - Overrides `args[3]` (`targetWidth`) and `args[4]` (`targetHeight`) from `1080×1440` to **`1440×1920` (2K)**, **`2160×2880` (4K)**, or **Full Sensor 3:4**.
+3. **Stage 3 — WebP Compression & 700 KB Size Cap (`Lknm;->f` $\rightarrow$ `Llz9;->a(Landroid/graphics/Bitmap;Ldz9;)Lyo6;`)**:
+   - `Lknm;->f` builds `Ldz9` with initial quality `d = 90` (`0x5a`) and size constraint `c = Lxg1;->a` (`Ljvb` = `LimitedTo(tryToReduceTo=700 KB, maxAccepted=700 KB)`).
+   - If the compressed `.webp` exceeds **700 KB** (`0xaf000` bytes), `Llz9;->a` loops in steps of `-10` quality down to `50` and **throws a fatal `Lyb7` error** if still above 700 KB.
+   - **Our Hook (`lz9.a` `beforeHookedMethod`)**:
+     - Overrides `dz9.d` (`quality`) with the user's configured WebP quality (`50–100`, default `100`).
+     - Replaces `dz9.c` with `Lkvb.a` (`Unlimited`), skipping the 700 KB recompression loop and writing directly to `FileOutputStream` at full resolution and quality.
 
 ---
 
-## 2. Module Architecture
+## 2. Features & User Interface
 
-Because BeReal's internal classes (`Lknm`, `Llz9`, `Ltt7`) are obfuscated with R8 and change names across releases, `BeRealDcimSaver` hooks stable **Android framework boundaries** inside `com.bereal.ft`:
+### Accessing the Settings UI
+- **In-App Shortcut (Inside BeReal)**: Long-press (~600ms) the top-center **`"BeReal."`** header logo on the main screen to open the dark-themed configuration dialog.
+- **Standalone App**: Open **BeReal DCIM & Quality Mod** from your launcher or tap the **Settings** icon for the module inside **LSPosed Manager**. Changes sync live to `com.bereal.ft` via broadcast (`com.bereal.dcimsaver.ACTION_SYNC_PREFS`) or launch `Intent`.
 
-1. **`Uri.fromFile(File)` (`UriFromFileHook` - `afterHookedMethod`)**:
-   - Fires immediately at the end of `Llz9;->a` right after `FileOutputStream.close()` finishes flushing the `.webp` file to `/data/user/0/com.bereal.ft/files/camera/`.
-2. **`Application.onCreate()` (`AppOnCreateHook` - `afterHookedMethod`)**:
-   - Scans `/data/user/0/com.bereal.ft/files/camera/` on app startup and exports any existing `.webp` captures that have not yet been copied to `DCIM/BeReal/`.
-3. **`File.delete()` (`FileDeleteHook` - `beforeHookedMethod`)**:
-   - Acts as a pre-deletion safety net to ensure no `.webp` file in `files/camera/` is removed before being exported.
-4. **Zero-Permission Scoped Storage Export (`MediaStore`)**:
-   - In `AndroidManifest.xml`, BeReal declares `WRITE_EXTERNAL_STORAGE` with `android:maxSdkVersion="29"`. On Android 10+ (API 29+), direct `java.io.File` writes to `/sdcard/DCIM` are restricted, whereas inserting via `ContentResolver` into `MediaStore.Images.Media.EXTERNAL_CONTENT_URI` (`RELATIVE_PATH = "DCIM/BeReal"`, `MIME_TYPE = "image/webp"`) requires **no storage permissions**.
-   - Deduplicates both in-memory `(path, lastModified, length)` and on-disk (`DCIM/BeReal/BeReal_<filename>.webp`) so each photo is exported once.
+### Configurable Options (`ModConfig`)
+- **Photos to Save Locally (`DCIM/BeReal`)**:
+  - `Processed / Uploaded (.webp) Only`
+  - `Full-Resolution Raw Sensor Dump Only`
+  - `Both (Full-Res Sensor + Processed .webp)` *(Default)*
+- **Full-Resolution Sensor Dump Format**:
+  - `WebP (100% Quality / Lossless)` *(Default)*
+  - `JPEG (100% Quality)`
+  - `PNG (Uncompressed Lossless)`
+- **Extra Media Types**:
+  - Save Behind-the-Scenes (BTS) Raw Videos (`BtsVideoRaw_*.mp4`) to `DCIM/BeReal` *(Default: ON)*
+  - Save RealMoji Captures (`realmojis_temp/*.webp`) to `DCIM/BeReal` *(Default: ON)*
+- **Uploaded BeReal Post Quality Boost**:
+  - Target Upload Resolution: `1080×1440 (Default)`, `1440×1920 (2K QHD)`, `2160×2880 (4K UHD)` *(Default)*, or `Full Sensor Resolution (Max 3:4 Crop)`
+  - Upload WebP Compression Quality Slider: `50% – 100%` *(Default: 100%)*
+  - Bypass 700 KB Upload File Size Cap (`Unlimited` via `kvb.a`) *(Default: ON)*
 
 ---
 
-## 3. Project Structure & Building
+## 3. Building & Installation
 
-The module can be built either as a standalone CLI project using `apktool` + `zipalign` + `apksigner` (`./build.sh`) or with Gradle (`app/`).
-
-```text
-.
-├── AndroidManifest.xml       # Declares xposedmodule, minversion (82), and xposedscope
-├── apktool.yml               # Apktool build configuration
-├── assets/
-│   └── xposed_init           # Entrypoint: com.bereal.dcimsaver.MainHook
-├── build.sh                  # One-step CLI build, zipalign, and APK v2/v3 signing script
-├── res/
-│   └── values/
-│       ├── arrays.xml        # Defines xposed_scope (com.bereal.ft)
-│       ├── public.xml        # Resource ID table
-│       └── strings.xml       # Module label and description
-├── smali/
-│   └── com/bereal/dcimsaver/
-│       ├── MainHook.smali
-│       ├── MainHook_AppOnCreateHook.smali
-│       ├── MainHook_FileDeleteHook.smali
-│       └── MainHook_UriFromFileHook.smali
-├── src/
-│   └── com/bereal/dcimsaver/
-│       └── MainHook.java     # Java source implementation
-└── app/                      # Standard Android Studio / Gradle module layout
-```
-
-### Build with `./build.sh`
 ```bash
 ./build.sh
+adb install -r dist/bereal-dcim-lsposed.apk
 ```
-Produces the signed APK at `dist/bereal-dcim-lsposed.apk`.
 
----
-
-## 4. Installation & Usage
-
-1. Install the signed APK via ADB:
-   ```bash
-   adb install -r dist/bereal-dcim-lsposed.apk
-   ```
-2. Open **LSPosed Manager**, enable **BeReal DCIM Saver**, and ensure **BeReal** (`com.bereal.ft`) is checked in the module scope.
-3. Force-stop and relaunch **BeReal**:
+1. Enable **BeReal DCIM & Quality Mod** in **LSPosed Manager** with **BeReal** (`com.bereal.ft`) checked in scope.
+2. Force-stop and relaunch **BeReal**:
    ```bash
    adb shell am force-stop com.bereal.ft
    ```
-4. Any existing or newly captured camera `.webp` photos in `/data/user/0/com.bereal.ft/files/camera/` will appear in `/sdcard/DCIM/BeReal/` as:
-   - `BeReal_primary_<timestamp>.webp`
-   - `BeReal_secondary_<timestamp>.webp`
 
 ---
 
-## 5. Credits & Disclaimers
+## 4. Credits & Disclaimers
 
-- **Engineering, Reverse Engineering & Module Development**: Assisted by **Antigravity (Google DeepMind)**. Decompiled `com.bereal.ft` (`v3.98.0`) with `apktool`, traced the CameraX $\rightarrow$ WebP storage pipeline (`Ltt7`/`Lps7`/`Lknm`/`Llz9`), and implemented the Scoped Storage `MediaStore` LSPosed hooks.
-- **Disclaimer**: *This project is an experimental tool created for personal archival, educational research, and interoperability. It is not affiliated with or endorsed by BeReal. Use at your own risk.*
+- **Engineering, Reverse Engineering & Module Development**: Assisted by **Antigravity (Google DeepMind)**. Decompiled `com.bereal.ft` (`v3.98.0-3600852`) with `apktool`, traced the CameraX `ImageProxy` $\rightarrow$ `gf2.a` (`1080×1440` downscale) $\rightarrow$ `lz9.a` (`dz9` WebP 90 / 700 KB `LimitedTo` cap) pipeline, and implemented the full-resolution sensor dump, upload resolution/quality overrides, Scoped Storage `MediaStore` exporter, and dual settings UI.
+- **Disclaimer**: *This project is an experimental, AI-assisted tool created for personal archival, educational research, and interoperability. Increasing upload dimensions beyond BeReal's default `1080×1440` modifies client-side encoding behavior; use at your own risk. Not affiliated with or endorsed by BeReal.*
